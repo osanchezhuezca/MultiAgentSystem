@@ -9,6 +9,7 @@ Built as a technical assessment for Tata Consultancy Services.
 ## Table of Contents
 
 - [Overview](#overview)
+- [Video Demo](#video-demo)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
@@ -36,6 +37,14 @@ This project solves that with a supervisor-based multi-agent architecture. A sin
 - **Supervisor** classifies the incoming query, dispatches to one or both agents (in parallel when needed), and synthesizes a unified answer.
 
 The system is exposed through three interfaces: a Streamlit chat application, a command line tool, and an MCP server for integration with external agent hosts.
+
+---
+
+## Video Demo
+
+[![Watch the demo on YouTube](https://img.youtube.com/vi/6fhl-TXIodw/maxresdefault.jpg)](https://www.youtube.com/watch?v=6fhl-TXIodw)
+
+If the thumbnail does not render, the video is available at [https://youtu.be/6fhl-TXIodw](https://youtu.be/6fhl-TXIodw).
 
 ---
 

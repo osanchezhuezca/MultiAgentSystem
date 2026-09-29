@@ -8,19 +8,23 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import shutil
 import sys
 from pathlib import Path
 
 from src.config import settings
 from src.ingestion.pdf_loader import load_and_chunk_pdf
-from src.ingestion.vector_store import build_vector_store
+from src.ingestion.vector_store import build_vector_store, reset_vector_store
+from src.vectorstore import reset_client_cache
 
 
-def build(pdf_dir: Path, persist_dir: Path, reset: bool = False) -> int:
-    """Embed every PDF in pdf_dir into a Chroma store at persist_dir.
+def build(pdf_dir: Path, persist_dir: Path | None = None, reset: bool = False) -> int:
+    """Embed every PDF in pdf_dir into the shared Chroma collection.
 
     Returns the number of chunks written.
+
+    The persist_dir argument is retained for CLI compatibility but is no
+    longer used: the shared client in src/vectorstore.py always points at
+    settings.chroma_persist_dir.
     """
     if not pdf_dir.exists():
         raise FileNotFoundError(f"PDF directory not found: {pdf_dir}")
@@ -29,9 +33,10 @@ def build(pdf_dir: Path, persist_dir: Path, reset: bool = False) -> int:
     if not pdfs:
         raise FileNotFoundError(f"No PDFs found in {pdf_dir}")
 
-    if reset and persist_dir.exists():
-        print(f"Removing existing vector store at {persist_dir} ...")
-        shutil.rmtree(persist_dir)
+    if reset:
+        print("Resetting vector store ...")
+        reset_vector_store()
+        reset_client_cache()
 
     all_chunks = []
     for pdf in pdfs:
@@ -44,9 +49,9 @@ def build(pdf_dir: Path, persist_dir: Path, reset: bool = False) -> int:
         print("No chunks produced — check your PDFs.", file=sys.stderr)
         return 0
 
-    print(f"Embedding {len(all_chunks)} chunks into {persist_dir} ...")
-    build_vector_store(all_chunks, persist_dir=str(persist_dir))
-    print(f"Done. Vector store contains {len(all_chunks)} chunks.")
+    print(f"Embedding {len(all_chunks)} chunks into the shared collection ...")
+    build_vector_store(all_chunks)
+    print(f"Done. Wrote {len(all_chunks)} chunks.")
     return len(all_chunks)
 
 
@@ -62,12 +67,12 @@ def main() -> None:
         "--persist-dir",
         type=Path,
         default=Path(settings.chroma_persist_dir),
-        help="Where to persist the Chroma store",
+        help="Retained for compatibility; the shared client owns the path.",
     )
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="Delete the existing store before rebuilding",
+        help="Delete the existing collection before rebuilding",
     )
     args = parser.parse_args()
 

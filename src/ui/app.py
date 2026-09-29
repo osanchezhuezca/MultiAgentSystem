@@ -13,8 +13,10 @@ if str(PROJECT_ROOT) not in sys.path:
 import streamlit as st
 
 from src.config import settings
-from src.ingestion.build import build as build_vector_store
 from src.agents.supervisor import build_supervisor_graph
+from src.ingestion.pdf_loader import load_and_chunk_pdf
+from src.ingestion.vector_store import build_vector_store
+from src.vectorstore import get_collection
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -37,24 +39,32 @@ if "messages" not in st.session_state:
 # ---------- Sidebar ----------
 with st.sidebar:
     st.header("Policy Documents")
-    uploaded = st.file_uploader(
-        "Upload a policy PDF",
-        type=["pdf"],
-        help="New PDFs are embedded into the vector store immediately.",
-    )
+    uploaded = st.file_uploader("Upload a policy PDF", type=["pdf"])
 
     if uploaded is not None:
         if st.button("Ingest PDF", type="primary", use_container_width=True):
             with st.spinner(f"Ingesting {uploaded.name} ..."):
-                tmp_dir = Path(tempfile.mkdtemp())
-                tmp_path = tmp_dir / uploaded.name
-                tmp_path.write_bytes(uploaded.getbuffer())
                 try:
-                    n = build_vector_store(
-                        pdf_dir=tmp_dir,
-                        persist_dir=Path(settings.chroma_persist_dir),
-                    )
-                    st.success(f"Added {n} chunks from {uploaded.name}.")
+                    tmp_dir = Path(tempfile.mkdtemp())
+                    tmp_path = tmp_dir / uploaded.name
+                    tmp_path.write_bytes(uploaded.getbuffer())
+
+                    chunks = load_and_chunk_pdf(str(tmp_path))
+                    if not chunks:
+                        st.error("No text extracted from the PDF.")
+                    else:
+                        build_vector_store(chunks)
+
+                        # Read the count through the same shared client
+                        count = get_collection().count()
+
+                        st.success(
+                            f"Added {len(chunks)} chunks from {uploaded.name}. "
+                            f"Collection now has {count} vectors."
+                        )
+
+                        # Force the supervisor graph to rebuild its RAG chain
+                        get_graph.clear()
                 except Exception as e:
                     st.error(f"Ingestion failed: {e}")
 
