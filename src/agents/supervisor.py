@@ -16,6 +16,8 @@ class RouterDecision(BaseModel):
 class AgentState(TypedDict):
     query: str
     route: str
+    sql_query: str        
+    rag_query: str         
     sql_result: Annotated[str, operator.add]
     rag_result: Annotated[str, operator.add]
     final_answer: str

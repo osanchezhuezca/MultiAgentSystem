@@ -2,8 +2,7 @@
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain_core.messages import HumanMessage
-from langgraph.prebuilt import create_react_agent
-
+from langchain.agents import create_agent
 from src.config import settings
 from src.llm import get_llm
 
@@ -31,7 +30,11 @@ def build_sql_agent(db_url: str | None = None, llm=None):
     llm = llm or get_llm()
     toolkit = SQLDatabaseToolkit(db=db, llm=llm)
     tools = toolkit.get_tools()
-    agent = create_react_agent(llm, tools, prompt=SQL_SYSTEM_PROMPT)
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt=SQL_SYSTEM_PROMPT,
+    )
     return agent
 
 
