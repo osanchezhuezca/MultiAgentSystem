@@ -1,0 +1,47 @@
+# requirements.txt
+langchain>=0.3
+langgraph>=0.2
+langchain-openai>=0.2
+langchain-community>=0.3
+langchain-chroma>=0.2
+langchain-text-splitters>=0.3
+chromadb>=0.5
+sentence-transformers>=3.0
+pypdf>=5.0
+sqlalchemy>=2.0
+streamlit>=1.40
+mcp>=1.0
+fastmcp>=2.0
+pydantic-settings>=2.0
+pandas>=2.0
+pytest>=8.0
+pytest-asyncio>=0.24
+ruff>=0.6
+mypy>=1.10
+ipykernel>=6.29
+jupyterlab>=4.2
+
+# Core
+langchain>=0.3
+langgraph>=0.2
+langchain-community>=0.3
+langchain-chroma>=0.2
+langchain-core>=0.3
+
+# LLM providers (install whichever you use)
+langchain-openai>=0.2
+# langchain-groq>=0.2         # uncomment if using Groq
+# langchain-ollama>=0.2       # uncomment if using Ollama
+
+# Embeddings / vector store
+chromadb>=0.5
+sentence-transformers>=3.0
+
+# Other
+pypdf>=5.0
+sqlalchemy>=2.0
+streamlit>=1.40
+mcp>=1.0
+fastmcp>=2.0
+pydantic-settings>=2.0
+pandas>=2.0
